@@ -1,4 +1,4 @@
-package tests.java.lang;
+package tests.java.util;
 
 import org.junit.Test;
 import tests.base.BaseTest;

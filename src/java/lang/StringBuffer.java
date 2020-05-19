@@ -92,7 +92,7 @@ import java.util.Arrays;
  * @author      Arthur van Hoff
  * @see     java.lang.StringBuilder
  * @see     java.lang.String
- * @since   JDK1.0
+ * @since   JDK1.0   //my:加了很多synchronized
  */
  public final class StringBuffer
     extends AbstractStringBuilder

@@ -105,13 +105,13 @@ import java.util.regex.PatternSyntaxException;
  * @see     java.lang.StringBuffer
  * @see     java.lang.StringBuilder
  * @see     java.nio.charset.Charset
- * @since   JDK1.0
+ * @since   JDK1.0  my:final修饰String类 表示不能被继承 而且里面的方法不能被重写
  */
 
 public final class String
     implements java.io.Serializable, Comparable<String>, CharSequence {
     /** The value is used for character storage. */
-    private final char value[];
+    private final char value[];//my:被final修饰
 
     /** Cache the hash code for the string */
     private int hash; // Default to 0
@@ -1930,7 +1930,7 @@ public final class String
         if (subLen < 0) {
             throw new StringIndexOutOfBoundsException(subLen);
         }
-        return (beginIndex == 0) ? this : new String(value, beginIndex, subLen);
+        return (beginIndex == 0) ? this : new String(value, beginIndex, subLen);//my:生成新的对象
     }
 
     /**
@@ -2031,7 +2031,7 @@ public final class String
         int len = value.length;
         char buf[] = Arrays.copyOf(value, len + otherLen);
         str.getChars(buf, len);
-        return new String(buf, true);
+        return new String(buf, true);//my:也是生成新的对象
     }
 
     /**
@@ -2145,7 +2145,7 @@ public final class String
      * <blockquote>
      * <code>
      * {@link java.util.regex.Pattern}.{@link
-     * java.util.regex.Pattern#compile compile}(<i>regex</i>).{@link
+     * java.util.regex.Pattern# compile}(<i>regex</i>).{@link
      * java.util.regex.Pattern#matcher(java.lang.CharSequence) matcher}(<i>str</i>).{@link
      * java.util.regex.Matcher#replaceFirst replaceFirst}(<i>repl</i>)
      * </code>
@@ -2190,7 +2190,7 @@ public final class String
      * <blockquote>
      * <code>
      * {@link java.util.regex.Pattern}.{@link
-     * java.util.regex.Pattern#compile compile}(<i>regex</i>).{@link
+     * java.util.regex.Pattern# compile}(<i>regex</i>).{@link
      * java.util.regex.Pattern#matcher(java.lang.CharSequence) matcher}(<i>str</i>).{@link
      * java.util.regex.Matcher#replaceAll replaceAll}(<i>repl</i>)
      * </code>
@@ -2303,7 +2303,7 @@ public final class String
      * <blockquote>
      * <code>
      * {@link java.util.regex.Pattern}.{@link
-     * java.util.regex.Pattern#compile compile}(<i>regex</i>).{@link
+     * java.util.regex.Pattern# compile}(<i>regex</i>).{@link
      * java.util.regex.Pattern#split(java.lang.CharSequence,int) split}(<i>str</i>,&nbsp;<i>n</i>)
      * </code>
      * </blockquote>
