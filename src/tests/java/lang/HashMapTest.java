@@ -16,5 +16,7 @@ public class HashMapTest extends BaseTest {
     public void testHashcode() {
         Map<String,String> map = new HashMap<>();
         map.put("test", "test");
+        String s = map.get("test");
+        System.out.println(s);
     }
 }

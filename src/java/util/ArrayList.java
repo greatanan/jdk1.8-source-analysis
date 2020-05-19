@@ -227,7 +227,7 @@ public class ArrayList<E> extends AbstractList<E>
         return minCapacity;
         }
 
-    private void ensureCapacityInternal(int minCapacity) {
+    private void ensureCapacityInternal(int minCapacity) {//确保内部容量
         ensureExplicitCapacity(calculateCapacity(elementData, minCapacity));
     }
 
@@ -453,7 +453,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /**
-     * Appends the specified element to the end of this list.
+     * Appends the specified element to the end of this list.    my:将指定元素添加到此列表的末尾
      *
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by {@link Collection#add})
