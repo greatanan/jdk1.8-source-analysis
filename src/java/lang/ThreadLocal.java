@@ -157,10 +157,10 @@ public class ThreadLocal<T> {
      * @return the current thread's value of this thread-local
      */
     public T get() {
-        Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
+        Thread t = Thread.currentThread();//拿到了我们当前线程
+        ThreadLocalMap map = getMap(t);//通过当前线程拿到了当前的ThreadLocalMap
         if (map != null) {
-            ThreadLocalMap.Entry e = map.getEntry(this);
+            ThreadLocalMap.Entry e = map.getEntry(this);//如果map不为空的话就会将我们的this传入getEntity方法()
             if (e != null) {
                 @SuppressWarnings("unchecked")
                 T result = (T)e.value;
@@ -241,7 +241,7 @@ public class ThreadLocal<T> {
      * @param firstValue value for the initial entry of the map
      */
     void createMap(Thread t, T firstValue) {
-        t.threadLocals = new ThreadLocalMap(this, firstValue);
+        t.threadLocals = new ThreadLocalMap(this, firstValue);//mynote: new了一个ThreadLocalMap并将当前的ThreadLocal对象作为键，我们要存入的值作为值传入
     }
 
     /**
@@ -309,7 +309,7 @@ public class ThreadLocal<T> {
             /** The value associated with this ThreadLocal. */
             Object value;
 
-            Entry(ThreadLocal<?> k, Object v) {
+            Entry(ThreadLocal<?> k, Object v) {//用ThreadLocal对象和值创建一个Entry
                 super(k);
                 value = v;
             }

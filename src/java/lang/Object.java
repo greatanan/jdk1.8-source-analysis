@@ -266,7 +266,7 @@ public class Object {
      * @throws  IllegalMonitorStateException  if the current thread is not
      *               the owner of this object's monitor.
      * @see        java.lang.Object#notifyAll()
-     * @see        java.lang.Object#wait()
+     * @see        java.lang.Object#wait()  //my:唤醒一个正在该对象上等待的线程
      */
     public final native void notify();
 
