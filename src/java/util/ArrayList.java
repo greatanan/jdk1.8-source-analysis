@@ -352,7 +352,7 @@ public class ArrayList<E> extends AbstractList<E>
      */
     public Object clone() {
         try {
-            ArrayList<?> v = (ArrayList<?>) super.clone();
+            ArrayList<?> v = (ArrayList<?>) super.clone();//mynote: 调用Object类的克隆方法
             v.elementData = Arrays.copyOf(elementData, size);
             v.modCount = 0;
             return v;
