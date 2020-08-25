@@ -112,19 +112,19 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Default initial capacity.
      */
-    private static final int DEFAULT_CAPACITY = 10;
+    private static final int DEFAULT_CAPACITY = 10; // 默认初始容量
 
     /**
      * Shared empty array instance used for empty instances.
      */
-    private static final Object[] EMPTY_ELEMENTDATA = {};
+    private static final Object[] EMPTY_ELEMENTDATA = {};//mynote: 空数组
 
     /**
      * Shared empty array instance used for default sized empty instances. We
      * distinguish this from EMPTY_ELEMENTDATA to know how much to inflate when
      * first element is added.
      */
-    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};//mynote: 默认的一个空数组
 
     /**
      * The array buffer into which the elements of the ArrayList are stored.
@@ -132,14 +132,14 @@ public class ArrayList<E> extends AbstractList<E>
      * empty ArrayList with elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA
      * will be expanded to DEFAULT_CAPACITY when the first element is added.
      */
-    transient Object[] elementData; // non-private to simplify nested class access
+    transient Object[] elementData; // non-private to simplify nested class access //mynote: 集合真正存储数组元素的数组
 
     /**
      * The size of the ArrayList (the number of elements it contains).
      *
      * @serial
      */
-    private int size;
+    private int size;//mynote: 集合大小
 
     /**
      * Constructs an empty list with the specified initial capacity.
@@ -163,7 +163,7 @@ public class ArrayList<E> extends AbstractList<E>
      * Constructs an empty list with an initial capacity of ten.
      */
     public ArrayList() {
-        this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
+        this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA; //mynote: 通过空参构造方法创建集合对应并未创建一个初始容量是10的数组  仅仅将一个空数组的地址赋值给了elementData
     }
 
     /**
@@ -301,7 +301,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @return <tt>true</tt> if this list contains the specified element
      */
     public boolean contains(Object o) {
-        return indexOf(o) >= 0;
+        return indexOf(o) >= 0; // 调用indexOf方法进行查找
     }
 
     /**
@@ -309,10 +309,10 @@ public class ArrayList<E> extends AbstractList<E>
      * in this list, or -1 if this list does not contain the element.
      * More formally, returns the lowest index <tt>i</tt> such that
      * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-     * or -1 if there is no such index.
+     * or -1 if there is no such index. 返回指定元素的第一次出现在这个列表中的索引，或-1  该方法整理完毕
      */
     public int indexOf(Object o) {
-        if (o == null) {
+        if (o == null) { // 如果元素是null,也进行遍历操作 因为集合中有可能够会存储null
             for (int i = 0; i < size; i++)
                 if (elementData[i]==null)
                     return i;
@@ -353,7 +353,7 @@ public class ArrayList<E> extends AbstractList<E>
     public Object clone() {
         try {
             ArrayList<?> v = (ArrayList<?>) super.clone();//mynote: 调用Object类的克隆方法
-            v.elementData = Arrays.copyOf(elementData, size);
+            v.elementData = Arrays.copyOf(elementData, size);//mynote: 拷贝数组
             v.modCount = 0;
             return v;
         } catch (CloneNotSupportedException e) {
@@ -427,12 +427,12 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @param  index index of the element to return
      * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}  根据索引获取集合中元素 整理完毕
      */
     public E get(int index) {
-        rangeCheck(index);
+        rangeCheck(index); // 范围检验
 
-        return elementData(index);
+        return elementData(index); // 直接根据索引取出集合元素
     }
 
     /**
@@ -445,11 +445,11 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public E set(int index, E element) {
-        rangeCheck(index);
+        rangeCheck(index); // 范围校验
 
-        E oldValue = elementData(index);
-        elementData[index] = element;
-        return oldValue;
+        E oldValue = elementData(index); // 先取出index对应的元素,且赋值给oldValue
+        elementData[index] = element; // 将element直接覆盖index对应的元素
+        return oldValue; //返回被覆盖的元素
     }
 
     /**
@@ -490,21 +490,21 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}  //mynote: 根据索引删除元素 该方法整理完毕
      */
     public E remove(int index) {
         rangeCheck(index);
 
         modCount++;
-        E oldValue = elementData(index);
+        E oldValue = elementData(index); // 将index对应的元素赋值给 oldValue
 
-        int numMoved = size - index - 1;
-        if (numMoved > 0)
+        int numMoved = size - index - 1; //  计算集合需要移动元素个数
+        if (numMoved > 0)  // 如果需要移动元素个数大于0,就使用arrayCopy方法进行拷贝   注意:数据源和数据目的就是elementData
             System.arraycopy(elementData, index+1, elementData, index,
                              numMoved);
-        elementData[--size] = null; // clear to let GC do its work
+        elementData[--size] = null; // clear to let GC do its work  将源集合最后一个元素置为null,尽早让垃圾回收机制对其进行回收
 
-        return oldValue;
+        return oldValue; // 返回被删除的元素
     }
 
     /**
@@ -518,23 +518,23 @@ public class ArrayList<E> extends AbstractList<E>
      * changed as a result of the call).
      *
      * @param o element to be removed from this list, if present
-     * @return <tt>true</tt> if this list contained the specified element
+     * @return <tt>true</tt> if this list contained the specified element  //mynote: 根据元素删除元素
      */
     public boolean remove(Object o) {
-        if (o == null) {
+        if (o == null) { // 判断要删除的元素是不是null
             for (int index = 0; index < size; index++)
-                if (elementData[index] == null) {
-                    fastRemove(index);
+                if (elementData[index] == null) { // 判断集合中的元素是否为null
+                    fastRemove(index);  //调用fastRemove方法快速删除 这里是根据索引删除
                     return true;
                 }
         } else {
             for (int index = 0; index < size; index++)
-                if (o.equals(elementData[index])) {
-                    fastRemove(index);
+                if (o.equals(elementData[index])) { //调用equals方法进行比较是否相等
+                    fastRemove(index); //调用fastRemove方法快速删除 这里是根据索引删除
                     return true;
                 }
         }
-        return false;
+        return false; // 如果集合没有o该元素,那么就会返回false
     }
 
     /*
@@ -543,23 +543,23 @@ public class ArrayList<E> extends AbstractList<E>
      */
     private void fastRemove(int index) {
         modCount++;
-        int numMoved = size - index - 1;
-        if (numMoved > 0)
+        int numMoved = size - index - 1; // 计算集合需要移动元素的个数
+        if (numMoved > 0) //如果需要移动的个数大于0,调用arrayCopy方法进行拷贝
             System.arraycopy(elementData, index+1, elementData, index,
                              numMoved);
-        elementData[--size] = null; // clear to let GC do its work
+        elementData[--size] = null; // clear to let GC do its work 将集合最后一个元素置为null,尽早被释放
     }
 
     /**
      * Removes all of the elements from this list.  The list will
-     * be empty after this call returns.
+     * be empty after this call returns. 清空集合方法 整理完成
      */
     public void clear() {
         modCount++;
 
         // clear to let GC do its work
         for (int i = 0; i < size; i++)
-            elementData[i] = null;
+            elementData[i] = null; // 遍历集合,将集合每一个索引对应位置上的元素都置为null,尽早让其释放
 
         size = 0;
     }

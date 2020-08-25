@@ -77,7 +77,7 @@ import java.util.function.Consumer;
  * @see     List
  * @see     ArrayList
  * @since 1.2
- * @param <E> the type of elements held in this collection
+ * @param <E> the type of elements held in this collection  //mynote: LinkedList没有实现随机访问的接口
  */
 
 public class LinkedList<E>
@@ -473,8 +473,8 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public E get(int index) {
-        checkElementIndex(index);
-        return node(index).item;
+        checkElementIndex(index);//mynote: 检验索引是否有效
+        return node(index).item;//mynote: 调用node(index)拿到具体元素
     }
 
     /**
@@ -564,15 +564,15 @@ public class LinkedList<E>
      * Returns the (non-null) Node at the specified element index.
      */
     Node<E> node(int index) {
-        // assert isElementIndex(index);
+        // assert isElementIndex(index); //mynote: node方法每次被调用的时候都会根据集合size进行折半操作 判断get方法中的index是小于集合长度的一般还是大于
 
         if (index < (size >> 1)) {
-            Node<E> x = first;
+            Node<E> x = first;//mynote: 如果小于就从链表的同步一个一个往后走
             for (int i = 0; i < index; i++)
                 x = x.next;
             return x;
         } else {
-            Node<E> x = last;
+            Node<E> x = last;//mynote: 如果大于就从链表的尾部一个个往前找
             for (int i = size - 1; i > index; i--)
                 x = x.prev;
             return x;
@@ -864,8 +864,8 @@ public class LinkedList<E>
      * @see List#listIterator(int)
      */
     public ListIterator<E> listIterator(int index) {
-        checkPositionIndex(index);
-        return new ListItr(index);
+        checkPositionIndex(index);//mynote: 检查索引位置
+        return new ListItr(index);//mynote: 返回ListItr对象
     }
 
     private class ListItr implements ListIterator<E> {
@@ -880,19 +880,19 @@ public class LinkedList<E>
             nextIndex = index;
         }
 
-        public boolean hasNext() {
+        public boolean hasNext() {//mynote: 如果nextIndex小于集合长度 就说明还有元素可以进行nest
             return nextIndex < size;
         }
 
         public E next() {
-            checkForComodification();
-            if (!hasNext())
+            checkForComodification();//mynote: 检查集合实际修改次数和预期次数是否一样
+            if (!hasNext())//mynote: 判断是否有元素
                 throw new NoSuchElementException();
 
-            lastReturned = next;
-            next = next.next;
+            lastReturned = next;//mynote: 将链表的第一个元素赋值给lastReturned
+            next = next.next;//mynote: 将下一个元素赋值给nest
             nextIndex++;
-            return lastReturned.item;
+            return lastReturned.item;//mynote: 返回第一个元素
         }
 
         public boolean hasPrevious() {

@@ -12,6 +12,10 @@ public class ArrayListTest extends BaseTest {
     public void testHashcode() {
         List<String> list = new ArrayList<>();
         list.add("test");
-        System.out.println(list);
+        list.add("test2");
+        list.add("test3");
+        list.remove(1);
+        String s = list.toString();
+        System.out.println(list.toString());
     }
 }
