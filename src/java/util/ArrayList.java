@@ -112,7 +112,7 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Default initial capacity.
      */
-    private static final int DEFAULT_CAPACITY = 10; // 默认初始容量
+    private static final int DEFAULT_CAPACITY = 10; // 默认初始容量  这个初始容量在第一次扩容的时候有用 注意第一次扩容并不是创建一个空集合的时候, 而是需要放进元素需要扩容的时候才进行扩容
 
     /**
      * Shared empty array instance used for empty instances.
@@ -139,13 +139,13 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @serial
      */
-    private int size;//mynote: 集合大小
+    private int size; // mynote: 集合大小 这个大小是集合中实际存储元素的个数  一般elementData数组的长度是大于这个size的 如果让其相等可以调用trimToSize方法
 
     /**
      * Constructs an empty list with the specified initial capacity.
      *
      * @param  initialCapacity  the initial capacity of the list
-     * @throws IllegalArgumentException if the specified initial capacity
+     * @throws IllegalArgumentException if the specified initial capacity                   指定初始容量的构造方法：直接new一个指定长度的数组    整理完成
      *         is negative
      */
     public ArrayList(int initialCapacity) {
@@ -189,7 +189,7 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Trims the capacity of this <tt>ArrayList</tt> instance to be the
      * list's current size.  An application can use this operation to minimize
-     * the storage of an <tt>ArrayList</tt> instance.
+     * the storage of an <tt>ArrayList</tt> instance. 修剪这个ArrayList实例是列表的当前容量大小。            应用程序可以使用此操作来最小化ArrayList实例的存储。  整理完成
      */
     public void trimToSize() {
         modCount++;
@@ -427,7 +427,7 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @param  index index of the element to return
      * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException {@inheritDoc}  根据索引获取集合中元素 整理完毕
+     * @throws IndexOutOfBoundsException {@inheritDoc}                             根据索引获取集合中元素 整理完毕
      */
     public E get(int index) {
         rangeCheck(index); // 范围检验
@@ -441,7 +441,7 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @param index index of the element to replace
      * @param element element to be stored at the specified position
-     * @return the element previously at the specified position
+     * @return the element previously at the specified position                 为某个索引位置设置某个值  整理完成
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public E set(int index, E element) {
@@ -453,7 +453,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /**
-     * Appends the specified element to the end of this list.    my:将指定元素添加到此列表的末尾
+     * Appends the specified element to the end of this list.                    将指定元素添加到此列表的末尾  整理完成
      *
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by {@link Collection#add})
@@ -490,7 +490,7 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
-     * @throws IndexOutOfBoundsException {@inheritDoc}  //mynote: 根据索引删除元素 该方法整理完毕
+     * @throws IndexOutOfBoundsException {@inheritDoc}                         //mynote: 根据索引删除元素 该方法整理完毕
      */
     public E remove(int index) {
         rangeCheck(index);
