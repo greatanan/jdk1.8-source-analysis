@@ -124,7 +124,7 @@ public class ArrayList<E> extends AbstractList<E>
      * distinguish this from EMPTY_ELEMENTDATA to know how much to inflate when
      * first element is added.
      */
-    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};//mynote: 默认的一个空数组
+    private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};//  mynote: 默认的一个空数组
 
     /**
      * The array buffer into which the elements of the ArrayList are stored.
