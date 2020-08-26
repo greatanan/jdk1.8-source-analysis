@@ -460,7 +460,7 @@ public class ArrayList<E> extends AbstractList<E>
      */
     public boolean add(E e) {
         ensureCapacityInternal(size + 1);  // Increments modCount!!
-        elementData[size++] = e;
+        elementData[size++] = e;  // 将元素放到数组对应索引地址
         return true;
     }
 
