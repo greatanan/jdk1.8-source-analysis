@@ -518,7 +518,7 @@ public class ArrayList<E> extends AbstractList<E>
      * changed as a result of the call).
      *
      * @param o element to be removed from this list, if present
-     * @return <tt>true</tt> if this list contained the specified element  //mynote: 根据元素删除元素
+     * @return <tt>true</tt> if this list contained the specified element                //mynote: 根据元素删除元素  整理完毕
      */
     public boolean remove(Object o) {
         if (o == null) { // 判断要删除的元素是不是null
@@ -539,10 +539,10 @@ public class ArrayList<E> extends AbstractList<E>
 
     /*
      * Private remove method that skips bounds checking and does not
-     * return the value removed.
+     * return the value removed.                                                                整理完毕
      */
     private void fastRemove(int index) {
-        modCount++;
+        modCount++;                     // 集合修改次数加 1
         int numMoved = size - index - 1; // 计算集合需要移动元素的个数
         if (numMoved > 0) //如果需要移动的个数大于0,调用arrayCopy方法进行拷贝
             System.arraycopy(elementData, index+1, elementData, index,
@@ -844,12 +844,12 @@ public class ArrayList<E> extends AbstractList<E>
      * An optimized version of AbstractList.Itr
      */
     private class Itr implements Iterator<E> {
-        int cursor;       // index of next element to return
-        int lastRet = -1; // index of last element returned; -1 if no such
-        int expectedModCount = modCount;
+        int cursor;       // index of next element to return                    下一个要返回元素的索引  光标
+        int lastRet = -1; // index of last element returned; -1 if no such      最后一个返回元素的索引
+        int expectedModCount = modCount;                                        // 将实际修改集合次数赋值给预期修改次数 这个值是第一次获取迭代器的时候初始化的
 
         public boolean hasNext() {
-            return cursor != size;
+            return cursor != size;  // 判断光标是不是不等于集合长度
         }
 
         @SuppressWarnings("unchecked")
@@ -861,8 +861,8 @@ public class ArrayList<E> extends AbstractList<E>
             Object[] elementData = ArrayList.this.elementData;
             if (i >= elementData.length)
                 throw new ConcurrentModificationException();
-            cursor = i + 1;
-            return (E) elementData[lastRet = i];
+            cursor = i + 1; // 光标自增
+            return (E) elementData[lastRet = i];  // 将 i 赋值给lastRet 然后取值
         }
 
         public void remove() {
@@ -902,7 +902,7 @@ public class ArrayList<E> extends AbstractList<E>
             checkForComodification();
         }
 
-        final void checkForComodification() {
+        final void checkForComodification() {      // 检验预期修改集合次数是不是和实际修改集合次数一样  整理完成
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
         }
