@@ -204,32 +204,32 @@ public class LinkedList<E>
     }
 
     /**
-     * Unlinks non-null node x.   解除节点 解开链表,让前后节点相互记录地址       整理完毕
+     * Unlinks non-null node x.
      */
     E unlink(Node<E> x) {
         // assert x != null;
-        final E element = x.item;        // 获取要删除的元素
-        final Node<E> next = x.next;     // 获取被删除节点下一个节点的地址
-        final Node<E> prev = x.prev;     // 获取被删除节点上一个节点的地址
+        final E element = x.item;
+        final Node<E> next = x.next;
+        final Node<E> prev = x.prev;
 
         if (prev == null) {
-            first = next;                // 如果被删除节点的上一个节点为null,就让被删除节点的下一个节点成为首节点
+            first = next;
         } else {
-            prev.next = next;            // 否则,被删除元素上一个节点的 下一个节点 变成 被删除元素的下一个节点
-            x.prev = null;               // /被删除元素的上一个节点置为null
+            prev.next = next;
+            x.prev = null;
         }
 
         if (next == null) {
-            last = prev;                 // 如果被删除元素的下一个节点为null,最后一个节点就等于被删除元素的上一个节点
+            last = prev;
         } else {
-            next.prev = prev;            // 否则,被删除节点的下一个节点 等于被删除节点的前一个节点
-            x.next = null;               // 被删除元素的下一个节点置为null
+            next.prev = prev;
+            x.next = null;
         }
 
-        x.item = null;                   // 被删除元素的内容置为null
-        size--;                          // 集合长度减一
-        modCount++;                      // 实际修改次数++
-        return element;                  // 返回被删除的元素
+        x.item = null;
+        size--;
+        modCount++;
+        return element;
     }
 
     /**
@@ -350,10 +350,10 @@ public class LinkedList<E>
      * changed as a result of the call).
      *
      * @param o element to be removed from this list, if present
-     * @return {@code true} if this list contained the specified element                 根据元素删除元素 整理完毕
+     * @return {@code true} if this list contained the specified element
      */
     public boolean remove(Object o) {
-        if (o == null) {  // 判断要删除的元素是不是null  不管是否为null都从第一个元素开始,从头部往后找   找到之后,调用unlink方法进行解绑,更改节点和节点之间记录的地址
+        if (o == null) {
             for (Node<E> x = first; x != null; x = x.next) {
                 if (x.item == null) {
                     unlink(x);
@@ -522,8 +522,8 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public E remove(int index) {
-        checkElementIndex(index); // 检查元素索引  校验索引是否在合法范围之内,不再就报错
-        return unlink(node(index)); // 先调用node(index)方法,找到需要删除的索引, 再调用unlink方法解开链条
+        checkElementIndex(index);
+        return unlink(node(index));
     }
 
     /**
@@ -561,13 +561,13 @@ public class LinkedList<E>
     }
 
     /**
-     * Returns the (non-null) Node at the specified element index.  根据索引返回索引处的节点node
+     * Returns the (non-null) Node at the specified element index.
      */
     Node<E> node(int index) {
         // assert isElementIndex(index); //mynote: node方法每次被调用的时候都会根据集合size进行折半操作 判断get方法中的index是小于集合长度的一般还是大于
 
-        if (index < (size >> 1)) { //
-            Node<E> x = first; //mynote: 索引小于集合长度的一半,那么就从头节点一个个的往后找
+        if (index < (size >> 1)) {
+            Node<E> x = first;//mynote: 如果小于就从链表的同步一个一个往后走
             for (int i = 0; i < index; i++)
                 x = x.next;
             return x;

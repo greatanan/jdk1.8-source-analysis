@@ -112,7 +112,7 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Default initial capacity.
      */
-    private static final int DEFAULT_CAPACITY = 10; //  默认初始容量  这个初始容量在第一次扩容的时候有用 注意第一次扩容并不是创建一个空集合的时候, 而是需要放进元素需要扩容的时候才进行扩容
+    private static final int DEFAULT_CAPACITY = 10; // 默认初始容量  这个初始容量在第一次扩容的时候有用 注意第一次扩容并不是创建一个空集合的时候, 而是需要放进元素需要扩容的时候才进行扩容
 
     /**
      * Shared empty array instance used for empty instances.
@@ -150,7 +150,7 @@ public class ArrayList<E> extends AbstractList<E>
      */
     public ArrayList(int initialCapacity) {
         if (initialCapacity > 0) {
-            this.elementData = new Object[initialCapacity];       // 创建一个指定大小的数组 并将地址赋值给elementData
+            this.elementData = new Object[initialCapacity];
         } else if (initialCapacity == 0) {
             this.elementData = EMPTY_ELEMENTDATA;
         } else {
@@ -160,7 +160,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /**
-     * Constructs an empty list with an initial capacity of ten.            整理完毕
+     * Constructs an empty list with an initial capacity of ten.
      */
     public ArrayList() {
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA; //mynote: 通过空参构造方法创建集合对应并未创建一个初始容量是10的数组  仅仅将一个空数组的地址赋值给了elementData
@@ -205,7 +205,7 @@ public class ArrayList<E> extends AbstractList<E>
      * necessary, to ensure that it can hold at least the number of elements
      * specified by the minimum capacity argument.
      *
-     * @param   minCapacity   the desired minimum capacity                         确保结合中的容量能满足   整理完成
+     * @param   minCapacity   the desired minimum capacity
      */
     public void ensureCapacity(int minCapacity) {
         int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA)
@@ -236,7 +236,7 @@ public class ArrayList<E> extends AbstractList<E>
 
         // overflow-conscious code
         if (minCapacity - elementData.length > 0)
-            grow(minCapacity);       // 调用扩容方法
+            grow(minCapacity);
     }
 
     /**
@@ -552,7 +552,7 @@ public class ArrayList<E> extends AbstractList<E>
 
     /**
      * Removes all of the elements from this list.  The list will
-     * be empty after this call returns.                                                        清空集合方法 整理完成
+     * be empty after this call returns. 清空集合方法 整理完成
      */
     public void clear() {
         modCount++;
@@ -866,15 +866,15 @@ public class ArrayList<E> extends AbstractList<E>
         }
 
         public void remove() {
-            if (lastRet < 0) // 判断最后返回元素的索引是否小于0,满足条件就产生 非法状态异常
+            if (lastRet < 0)
                 throw new IllegalStateException();
-            checkForComodification(); // 校验是否会产生并发修改异常,第一次调用不会,因为与其修改次数和实际修改次数一致
+            checkForComodification();
 
             try {
-                ArrayList.this.remove(lastRet); // 真正删除集合元素的方法,调用方法为ArrayList的方法remove,且将lastRet作为参数进行传递
-                cursor = lastRet;               // 将lastRet赋值给cursor
+                ArrayList.this.remove(lastRet);
+                cursor = lastRet;
                 lastRet = -1;
-                expectedModCount = modCount; // 再次将集合实际修改次数赋值给预期修改次数,那么这个时候不管集合自身是否删除成功  那么实际修改次数和预期修改次数又一致了,所以并不会产生并发修改异常
+                expectedModCount = modCount;
             } catch (IndexOutOfBoundsException ex) {
                 throw new ConcurrentModificationException();
             }
