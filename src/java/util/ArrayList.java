@@ -205,7 +205,7 @@ public class ArrayList<E> extends AbstractList<E>
      * necessary, to ensure that it can hold at least the number of elements
      * specified by the minimum capacity argument.
      *
-     * @param   minCapacity   the desired minimum capacity                         确保结合中的容量能满足   整理完成
+     * @param   minCapacity   the desired minimum capacity                         确保集合中的容量能满足   整理完成
      */
     public void ensureCapacity(int minCapacity) {
         int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA)
@@ -220,7 +220,7 @@ public class ArrayList<E> extends AbstractList<E>
         }
     }
 
-    private static int calculateCapacity(Object[] elementData, int minCapacity) {
+    private static int calculateCapacity(Object[] elementData, int minCapacity) {              // 计算需要多少容量 整理完成
         if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
             return Math.max(DEFAULT_CAPACITY, minCapacity);
         }
@@ -251,7 +251,7 @@ public class ArrayList<E> extends AbstractList<E>
      * Increases the capacity to ensure that it can hold at least the
      * number of elements specified by the minimum capacity argument.
      *
-     * @param minCapacity the desired minimum capacity
+     * @param minCapacity the desired minimum capacity                        具体扩容方法  整理完成
      */
     private void grow(int minCapacity) {
         // overflow-conscious code
