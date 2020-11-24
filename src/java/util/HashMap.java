@@ -233,19 +233,19 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     /**
      * The default initial capacity - MUST be a power of two.
      */
-    static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
+    static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16    // my: 默认初始容量是16
 
     /**
      * The maximum capacity, used if a higher value is implicitly specified
      * by either of the constructors with arguments.
      * MUST be a power of two <= 1<<30.
      */
-    static final int MAXIMUM_CAPACITY = 1 << 30;
+    static final int MAXIMUM_CAPACITY = 1 << 30;       // my: 最大支持容量
 
     /**
      * The load factor used when none specified in constructor.
      */
-    static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;       // my: 默认加载因子
 
     /**
      * The bin count threshold for using a tree rather than list for a
@@ -255,14 +255,14 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * tree removal about conversion back to plain bins upon
      * shrinkage.
      */
-    static final int TREEIFY_THRESHOLD = 8;
+    static final int TREEIFY_THRESHOLD = 8;      // my: 链表长度大于该值时候 转换为红黑树
 
     /**
      * The bin count threshold for untreeifying a (split) bin during a
      * resize operation. Should be less than TREEIFY_THRESHOLD, and at
      * most 6 to mesh with shrinkage detection under removal.
      */
-    static final int UNTREEIFY_THRESHOLD = 6;
+    static final int UNTREEIFY_THRESHOLD = 6;      // my: 红黑树存储的node数量小于该值时候红黑树转换为链表
 
     /**
      * The smallest table capacity for which bins may be treeified.
@@ -270,11 +270,11 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * Should be at least 4 * TREEIFY_THRESHOLD to avoid conflicts
      * between resizing and treeification thresholds.
      */
-    static final int MIN_TREEIFY_CAPACITY = 64;
+    static final int MIN_TREEIFY_CAPACITY = 64;            // my: 桶中的node被树化时最小的hash表容量 这里的容量的意思是hashMap的数组里面的元素个数
 
     /**
      * Basic hash bin node, used for most entries.  (See below for
-     * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
+     * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)           // my: 该静态内部类有四个属性 hash就是key的hash值 nest就是指定下一个节点
      */
     static class Node<K,V> implements Map.Entry<K,V> {
         final int hash;
@@ -626,41 +626,41 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
-            n = (tab = resize()).length;
-        if ((p = tab[i = (n - 1) & hash]) == null)
-            tab[i] = newNode(hash, key, value, null);
-        else {
+            n = (tab = resize()).length;   // 如果哈希表为空，则先创建一个哈希表,注意jdk1.8的时候hashmap是在第一次调用put方法的时候创建hash表 这个hash表默认的大小是16
+        if ((p = tab[i = (n - 1) & hash]) == null) //  n是hash表数组的长度 将长度减去1然后和key的hash值进行与运算得到在数组中的索引下标
+            tab[i] = newNode(hash, key, value, null); // 如果当前桶没有碰撞冲突（也就是这个桶上面还没有东西），则直接把键值对插入，完事
+        else { // 如果当前桶有值 也就是所谓的hash冲突了
             Node<K,V> e; K k;
-            if (p.hash == hash &&
+            if (p.hash == hash &&    // 这里的p就是当前桶的第一个元素
                 ((k = p.key) == key || (key != null && key.equals(k))))
-                e = p;
-            else if (p instanceof TreeNode)
+                e = p; // 如果没走进这个方法就有三种种情况：1.是哈希值不一样，2.是哈希值一样但是equals判断的不一样 3.是哈希值不一样equals判断的也不一样
+            else if (p instanceof TreeNode)  // //如果是采用红黑树的方式处理冲突，则通过红黑树的putTreeVal方法去插入这个键值对
                 e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-            else {
+            else {  //上面两个if条件都不走就走下面的else 传统的链表结构
                 for (int binCount = 0; ; ++binCount) {
-                    if ((e = p.next) == null) {
-                        p.next = newNode(hash, key, value, null);
+                    if ((e = p.next) == null) { // 到了链尾还没找到重复的key，则说明HashMap没有包含该键
+                        p.next = newNode(hash, key, value, null); // 创建一个新节点插入到尾部（注意是放到尾部）(七上八下)
                         if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
-                            treeifyBin(tab, hash);
+                            treeifyBin(tab, hash);  // 如果链表的长度大于TREEIFY_THRESHOLD这个临界值，则把链变为红黑树
                         break;
                     }
                     if (e.hash == hash &&
                         ((k = e.key) == key || (key != null && key.equals(k))))
-                        break;
+                        break;  // 找到了重复的key（哈希值一样而且equals方法判断的结果也一样）
                     p = e;
                 }
             }
             if (e != null) { // existing mapping for key
                 V oldValue = e.value;
                 if (!onlyIfAbsent || oldValue == null)
-                    e.value = value;
+                    e.value = value;  // 这里表示在上面的操作中找到了重复的键，所以这里把该键的值替换为新值
                 afterNodeAccess(e);
                 return oldValue;
             }
         }
         ++modCount;
-        if (++size > threshold)
-            resize();
+        if (++size > threshold)  // size就是我们存进去的键值对的个数 threshold是 capacity * load factor 就是我们数组的长度乘以装载因子
+            resize(); // 进行扩容
         afterNodeInsertion(evict);
         return null;
     }
@@ -750,12 +750,12 @@ public class HashMap<K,V> extends AbstractMap<K,V>
 
     /**
      * Replaces all linked nodes in bin at index for given hash unless
-     * table is too small, in which case resizes instead.
+     * table is too small, in which case resizes instead.                   该方法是把链表转换成红黑树
      */
     final void treeifyBin(Node<K,V>[] tab, int hash) {
         int n, index; Node<K,V> e;
-        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
-            resize();
+        if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY) // 当前table是null或者当前哈希表的桶节点个数小于64的时候，哈希表进行扩容。不进行将链条变成红黑树
+            resize();                                               // 之所以这样考虑是当哈希表中的桶节点个数少的时候（小于64）我们不建议采用红黑树结构。为了避免桶节点很少但是某个桶节点下面键值对过多 所以避免这种情况就是增加桶节点，扩容。桶节点多了，哈希冲突的概率就少了，一个桶节点下面就不会放那么多的键值对了。
         else if ((e = tab[index = (n - 1) & hash]) != null) {
             TreeNode<K,V> hd = null, tl = null;
             do {
