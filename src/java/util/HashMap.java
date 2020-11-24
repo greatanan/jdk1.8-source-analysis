@@ -567,14 +567,14 @@ public class HashMap<K,V> extends AbstractMap<K,V>
     final Node<K,V> getNode(int hash, Object key) {
         Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
         if ((tab = table) != null && (n = tab.length) > 0 &&
-            (first = tab[(n - 1) & hash]) != null) {
+            (first = tab[(n - 1) & hash]) != null) {              // 判断hash表不为空和key对应的桶不为空
             if (first.hash == hash && // always check first node
                 ((k = first.key) == key || (key != null && key.equals(k))))
-                return first;
-            if ((e = first.next) != null) {
-                if (first instanceof TreeNode)
+                return first;      // 如果桶节点的第一元素就是则直接返回
+            if ((e = first.next) != null) {    // 判断是不是有后续节点
+                if (first instanceof TreeNode)  // 如果当前的桶是采用红黑树处理冲突的 则调用红黑树的get方法获取值
                     return ((TreeNode<K,V>)first).getTreeNode(hash, key);
-                do {
+                do { // 如果当前桶不是采用红黑树处理冲突的 那就是传统的链表结构了 则通过循环的方法去链表中查询该key对应的值
                     if (e.hash == hash &&
                         ((k = e.key) == key || (key != null && key.equals(k))))
                         return e;
@@ -686,7 +686,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
             }
             else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
                      oldCap >= DEFAULT_INITIAL_CAPACITY)
-                newThr = oldThr << 1; // double threshold
+                newThr = oldThr << 1; // double threshold   扩容阈值进行翻倍
         }
         else if (oldThr > 0) // initial capacity was placed in threshold
             newCap = oldThr;
