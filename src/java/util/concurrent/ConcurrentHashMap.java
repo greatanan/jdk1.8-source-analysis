@@ -614,12 +614,12 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
      * MapEntry below), but can be used for read-only traversals used
      * in bulk tasks.  Subclasses of Node with a negative hash field
      * are special, and contain null keys and values (but are never
-     * exported).  Otherwise, keys and vals are never null.
+     * exported).  Otherwise, keys and vals are never null.                     // my: Node数据结构很简单，从上可知，就是一个链表，但是只允许对数据进行查找，不允许进行修改
      */
     static class Node<K,V> implements Map.Entry<K,V> {
         final int hash;
         final K key;
-        volatile V val;
+        volatile V val;     // my: val和next都会在扩容时发生变化，所以加上volatile来保持可见性和禁止重排序
         volatile Node<K,V> next;
 
         Node(int hash, K key, V val, Node<K,V> next) {
@@ -634,7 +634,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
         public final int hashCode()   { return key.hashCode() ^ val.hashCode(); }
         public final String toString(){ return key + "=" + val; }
         public final V setValue(V value) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException(); // my: 不允许更新value
         }
 
         public final boolean equals(Object o) {
@@ -1008,45 +1008,45 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
 
     /** Implementation for put and putIfAbsent */
     final V putVal(K key, V value, boolean onlyIfAbsent) {
-        if (key == null || value == null) throw new NullPointerException();
-        int hash = spread(key.hashCode());
+        if (key == null || value == null) throw new NullPointerException();  // my: key和value都不能为null
+        int hash = spread(key.hashCode());  // my: 计算key的hash值
         int binCount = 0;
         for (Node<K,V>[] tab = table;;) {
             Node<K,V> f; int n, i, fh;
             if (tab == null || (n = tab.length) == 0)
-                tab = initTable();
-            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
-                if (casTabAt(tab, i, null,
+                tab = initTable();  // my: 初始化数组
+            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) { // my: 如果桶节点上面还没有元素 这里f就是桶节点
+                if (casTabAt(tab, i, null,       // my: 通过cas把 key value放到这个桶节点上
                              new Node<K,V>(hash, key, value, null)))
                     break;                   // no lock when adding to empty bin
             }
-            else if ((fh = f.hash) == MOVED)
-                tab = helpTransfer(tab, f);
+            else if ((fh = f.hash) == MOVED) // my: 判断是不是在扩容
+                tab = helpTransfer(tab, f); // my: 帮助扩容
             else {
                 V oldVal = null;
-                synchronized (f) {
-                    if (tabAt(tab, i) == f) {
-                        if (fh >= 0) {
+                synchronized (f) {  // my: 如果以上条件都不满足，那就要进行加锁操作，也就是存在hash冲突，锁住桶节点（这个桶节点可能是链表也可能是红黑树）可以理解为锁住桶节点的第一个节点
+                    if (tabAt(tab, i) == f) {  // 加完锁以后再检查一下首节点是否还是这个
+                        if (fh >= 0) {  // my: 表示该节点是链表结构 fh是f的hash值 也就是桶节点上面第一个节点的hash值  >= 0就是链表结构
                             binCount = 1;
-                            for (Node<K,V> e = f;; ++binCount) {
+                            for (Node<K,V> e = f;; ++binCount) {  // my: 循环桶节点下面的链表
                                 K ek;
                                 if (e.hash == hash &&
                                     ((ek = e.key) == key ||
                                      (ek != null && key.equals(ek)))) {
                                     oldVal = e.val;
                                     if (!onlyIfAbsent)
-                                        e.val = value;
-                                    break;
+                                        e.val = value;   // my: 相同的key进行put就会覆盖原先的value
+                                    break; // 退出循环
                                 }
                                 Node<K,V> pred = e;
-                                if ((e = e.next) == null) {
+                                if ((e = e.next) == null) {  // my: 插入链表尾部
                                     pred.next = new Node<K,V>(hash, key,
                                                               value, null);
                                     break;
                                 }
                             }
                         }
-                        else if (f instanceof TreeBin) {
+                        else if (f instanceof TreeBin) { // my: 红黑树结构
                             Node<K,V> p;
                             binCount = 2;
                             if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key,
@@ -1059,15 +1059,15 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
                     }
                 }
                 if (binCount != 0) {
-                    if (binCount >= TREEIFY_THRESHOLD)
-                        treeifyBin(tab, i);
+                    if (binCount >= TREEIFY_THRESHOLD)   // my: binCount可以理解为链表的长度 当然如果在上面遍历for循环的时候如果找到了相同的key这里的binCount肯定是小于等于链表的长度的
+                        treeifyBin(tab, i); // my: 将链表改成红黑树
                     if (oldVal != null)
-                        return oldVal;
+                        return oldVal;  // my: 返回旧的值
                     break;
                 }
             }
         }
-        addCount(1L, binCount);
+        addCount(1L, binCount); // my: 扩容
         return null;
     }
 
@@ -2223,10 +2223,10 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
     private final Node<K,V>[] initTable() {
         Node<K,V>[] tab; int sc;
         while ((tab = table) == null || tab.length == 0) {
-            if ((sc = sizeCtl) < 0)
-                Thread.yield(); // lost initialization race; just spin
-            else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
-                try {
+            if ((sc = sizeCtl) < 0)   // sizeCtl开始的时候是0 是volatile修饰的
+                Thread.yield(); // lost initialization race; just spin 让出cps资源
+            else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {  // my: SIZECTL 进行减1
+                try {      // my: 通过cas控制只让一个线程进来初始化
                     if ((tab = table) == null || tab.length == 0) {
                         int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
                         @SuppressWarnings("unchecked")
@@ -2614,7 +2614,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
             if ((n = tab.length) < MIN_TREEIFY_CAPACITY)
                 tryPresize(n << 1);
             else if ((b = tabAt(tab, index)) != null && b.hash >= 0) {
-                synchronized (b) {
+                synchronized (b) {  // my: 加锁 b其实就是桶节点
                     if (tabAt(tab, index) == b) {
                         TreeNode<K,V> hd = null, tl = null;
                         for (Node<K,V> e = b; e != null; e = e.next) {
@@ -2627,7 +2627,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
                                 tl.next = p;
                             tl = p;
                         }
-                        setTabAt(tab, index, new TreeBin<K,V>(hd));
+                        setTabAt(tab, index, new TreeBin<K,V>(hd)); // my: 这一步暂时理解就是生成一个TreeBin放到桶节点上面替换之前的链表  TreeBin其实就是一个红黑树的包装
                     }
                 }
             }
@@ -2660,7 +2660,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
         TreeNode<K,V> left;
         TreeNode<K,V> right;
         TreeNode<K,V> prev;    // needed to unlink next upon deletion
-        boolean red;
+        boolean red;   // my: 标志红黑树的红节点
 
         TreeNode(int hash, K key, V val, Node<K,V> next,
                  TreeNode<K,V> parent) {
