@@ -112,7 +112,7 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Default initial capacity.
      */
-    private static final int DEFAULT_CAPACITY = 10; //  默认初始容量  这个初始容量在第一次扩容的时候有用 注意第一次扩容并不是创建一个空集合的时候, 而是需要放进元素需要扩容的时候才进行扩容
+    private static final int DEFAULT_CAPACITY = 10; // 默认初始容量  这个初始容量在第一次扩容的时候有用 注意第一次扩容并不是创建一个空集合的时候, 而是需要放进元素需要扩容的时候才进行扩容
 
     /**
      * Shared empty array instance used for empty instances.
@@ -999,8 +999,8 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws IllegalArgumentException {@inheritDoc}
      */
     public List<E> subList(int fromIndex, int toIndex) {
-        subListRangeCheck(fromIndex, toIndex, size);
-        return new SubList(this, 0, fromIndex, toIndex);
+        subListRangeCheck(fromIndex, toIndex, size);   // 校验入参是不是符合要求
+        return new SubList(this, 0, fromIndex, toIndex);   // 创建一个内部类 SubList 第一个入参就是当前集合ArrayList
     }
 
     static void subListRangeCheck(int fromIndex, int toIndex, int size) {
