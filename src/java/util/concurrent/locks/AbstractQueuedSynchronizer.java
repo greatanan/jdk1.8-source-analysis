@@ -286,7 +286,7 @@ import sun.misc.Unsafe;
  * @since 1.5
  * @author Doug Lea
  */
-public abstract class AbstractQueuedSynchronizer
+public abstract class AbstractQueuedSynchronizer        // my:
     extends AbstractOwnableSynchronizer
     implements java.io.Serializable {
 
@@ -514,23 +514,23 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * Head of the wait queue, lazily initialized.  Except for
-     * initialization, it is modified only via method setHead.  Note:
+     * Head of the wait queue, lazily initialized.  Except for                     // my: 等待队列的头，延迟初始化。 除初始化外，只能通过setHead方法进行修改。 注意：如果head存在，则保证其waitStatus不被取消。
+     * initialization, it is modified only via method setHead.  Note:               // my: 另外 AQS 中实现的 FIFO 队列（CLH 队列）其实是双向链表实现的，由 head, tail 节点表示，head 结点代表当前占用的线程，其他节点由于暂时获取不到锁所以依次排队等待锁释放。
      * If head exists, its waitStatus is guaranteed not to be
      * CANCELLED.
      */
-    private transient volatile Node head;
+    private transient volatile Node head;               // my: 双向链表的首节点
 
     /**
      * Tail of the wait queue, lazily initialized.  Modified only via
      * method enq to add new wait node.
      */
-    private transient volatile Node tail;
+    private transient volatile Node tail;              // 双向链表的尾结点
 
     /**
-     * The synchronization state.
+     * The synchronization state.      // my: 同步状态     state 由于是多线程共享变量，所以必须定义成 volatile，以保证 state 的可见性, 同时虽然 volatile 能保证可见性，但不能保证原子性，所以 AQS 提供了对 state 的原子操作方法，保证了线程安全。
      */
-    private volatile int state;
+    private volatile int state;  // my: 共享变量state
 
     /**
      * Returns the current value of synchronization state.
@@ -551,19 +551,19 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * Atomically sets synchronization state to the given updated
+     * Atomically sets synchronization state to the given updated     // my:     如果当前状态值等于期望值，则以原子方式将同步状态设置为给定的更新值。 此操作具有volatile读写的内存语义。
      * value if the current state value equals the expected value.
      * This operation has memory semantics of a {@code volatile} read
      * and write.
      *
-     * @param expect the expected value
-     * @param update the new value
+     * @param expect the expected value  期望值
+     * @param update the new value 更新值
      * @return {@code true} if successful. False return indicates that the actual
      *         value was not equal to the expected value.
      */
     protected final boolean compareAndSetState(int expect, int update) {
         // See below for intrinsics setup to support this
-        return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
+        return unsafe.compareAndSwapInt(this, stateOffset, expect, update);             // cas 获取 / 释放 state，保证线程安全地获取锁
     }
 
     // Queuing utilities
@@ -576,18 +576,18 @@ public abstract class AbstractQueuedSynchronizer
     static final long spinForTimeoutThreshold = 1000L;
 
     /**
-     * Inserts node into queue, initializing if necessary. See picture above.
+     * Inserts node into queue, initializing if necessary. See picture above.           将节点插入队列，必要时进行初始化。
      * @param node the node to insert
      * @return node's predecessor
      */
-    private Node enq(final Node node) {
-        for (;;) {
+    private Node enq(final Node node) {                                    // my: 第一遍循环时，tail指针为空，初始化一个Node结点，并把head和tail结点都指向它，然后第二次循环进来之后，tail结点不为空了，就将当前的结点加入到tail结点后面
+        for (;;) {                   // my: CAS自旋 直到成功加入到尾部
             Node t = tail;
             if (t == null) { // Must initialize
-                if (compareAndSetHead(new Node()))
-                    tail = head;
+                if (compareAndSetHead(new Node()))  // my: 队列为空，初始化一个Node结点作为Head结点     使用 CAS 创建 head 节点的时候只是简单调用了 new Node() 方法，并不像其他节点那样记录 thread，这是为啥???  这是因为 head 结点为虚结点，它只代表当前有线程占用了 state，至于占用 state 的是哪个线程，其实是调用了上文的 setExclusiveOwnerThread(current) ，即记录在 exclusiveOwnerThread 属性里
+                    tail = head;                      // my: ，并将tail结点也指向它
             } else {
-                node.prev = t;
+                node.prev = t;  // my: 把当前节点插入队列尾部
                 if (compareAndSetTail(t, node)) {
                     t.next = node;
                     return t;
@@ -603,9 +603,9 @@ public abstract class AbstractQueuedSynchronizer
      * @return the new node
      */
     private Node addWaiter(Node mode) {
-        Node node = new Node(Thread.currentThread(), mode);
+        Node node = new Node(Thread.currentThread(), mode);        // my: 这段代码首先会创建一个和当前线程绑定的Node节点，Node为双向链表
         // Try the fast path of enq; backup to full enq on failure
-        Node pred = tail;
+        Node pred = tail;            // my: 获取 FIFO 队列的尾结点，如果尾结点存在，则采用 CAS 的方式将等待线程入队，如果尾结点为空则执行 enq 方法
         if (pred != null) {
             node.prev = pred;
             if (compareAndSetTail(pred, node)) {
@@ -613,7 +613,7 @@ public abstract class AbstractQueuedSynchronizer
                 return node;
             }
         }
-        enq(node);
+        enq(node); // my: 如果tail指针为空 则直接调用 enq(node)方法将当前线程加入等待队列尾部 然后返回当前节点的前驱节点        首先判断 tail 是否为空，如果为空说明 FIFO 队列的 head，tail 还未构建，此时先构建头结点，构建之后再用 CAS 的方式将此线程结点入队
         return node;
     }
 
@@ -621,7 +621,7 @@ public abstract class AbstractQueuedSynchronizer
      * Sets head of queue to be node, thus dequeuing. Called only by
      * acquire methods.  Also nulls out unused fields for sake of GC
      * and to suppress unnecessary signals and traversals.
-     *
+     * // my: 将 head 设置成当前结点后，要把节点的 thread, pre 设置成 null，因为之前分析过了，head 是虚节点，不保存除 waitStatus（结点状态）的其他信息，所以这里把 thread ,pre 置为空，因为占有锁的线程由 exclusiveThread 记录了，如果 head 再记录 thread 不仅多此一举，反而在释放锁的时候要多操作一遍 head 的 thread 释放
      * @param node the node
      */
     private void setHead(Node node) {
@@ -631,8 +631,8 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * Wakes up node's successor, if one exists.
-     *
+     * Wakes up node's successor, if one exists.   唤醒节点的后一个节点（如果存在）。
+     *                                             // my: 方法的逻辑很简单，就是先将head的结点状态置为0，避免下面找结点的时候再找到head，然后找到队列中最前面的有效结点，然后唤醒  然后被唤醒的线程就会尝试用CAS获取锁，回到acquireQueued方法的逻辑
      * @param node the node
      */
     private void unparkSuccessor(Node node) {
@@ -643,7 +643,7 @@ public abstract class AbstractQueuedSynchronizer
          */
         int ws = node.waitStatus;
         if (ws < 0)
-            compareAndSetWaitStatus(node, ws, 0);
+            compareAndSetWaitStatus(node, ws, 0); // my: 将head结点的状态置为0
 
         /*
          * Thread to unpark is held in successor, which is normally
@@ -651,15 +651,15 @@ public abstract class AbstractQueuedSynchronizer
          * traverse backwards from tail to find the actual
          * non-cancelled successor.
          */
-        Node s = node.next;
-        if (s == null || s.waitStatus > 0) {
+        Node s = node.next; // my: 找到下一个需要唤醒的结点s
+        if (s == null || s.waitStatus > 0) {  // 如果为空或已取消
             s = null;
-            for (Node t = tail; t != null && t != node; t = t.prev)
+            for (Node t = tail; t != null && t != node; t = t.prev)   // 从后向前，直到找到等待状态小于等于0的节点，前面说了，节点waitStatus小于等于0时才有效   以下操作为从尾向前获取最后一个非取消状态的结点
                 if (t.waitStatus <= 0)
                     s = t;
         }
-        if (s != null)
-            LockSupport.unpark(s.thread);
+        if (s != null) // my: 找到有效的结点，直接唤醒
+            LockSupport.unpark(s.thread); // 唤醒
     }
 
     /**
@@ -794,7 +794,7 @@ public abstract class AbstractQueuedSynchronizer
      */
     private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
         int ws = pred.waitStatus;
-        if (ws == Node.SIGNAL)
+        if (ws == Node.SIGNAL)     // my:    // 1. 如果前置顶点的状态为 SIGNAL，表示当前节点可以阻塞了
             /*
              * This node has already set status asking a release
              * to signal it, so it can safely park.
@@ -828,13 +828,13 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
-     * Convenience method to park and then check if interrupted
+     * Convenience method to park and then check if interrupted     挂起当前线程并判断当前线程是否被中断    这里的阻塞线程很容易理解，但为啥要判断线程是否中断过呢，因为如果线程在阻塞期间收到了中断，唤醒（转为运行态）获取锁后（acquireQueued 为 true）需要补一个中断
      *
      * @return {@code true} if interrupted
      */
     private final boolean parkAndCheckInterrupt() {
-        LockSupport.park(this);
-        return Thread.interrupted();
+        LockSupport.park(this);  // my: 挂起当前线程  LockSupport.park方法会让当前线程进入waitting状态，在这种状态下，线程被唤醒的情况有两种，一是被unpark()，二是被interrupt()
+        return Thread.interrupted();  // my: 判断线程是否被中断
     }
 
     /*
@@ -857,21 +857,21 @@ public abstract class AbstractQueuedSynchronizer
     final boolean acquireQueued(final Node node, int arg) {
         boolean failed = true;
         try {
-            boolean interrupted = false;
-            for (;;) {
-                final Node p = node.predecessor();
-                if (p == head && tryAcquire(arg)) {
-                    setHead(node);
+            boolean interrupted = false;  // my: 标记是否会被中断
+            for (;;) {       // my: CAS 自旋
+                final Node p = node.predecessor();  // my: 获取当前节点的前节点
+                if (p == head && tryAcquire(arg)) {  // my: 先判断当前传入的Node的前结点是否为head结点，是的话就尝试获取锁，
+                    setHead(node);                     // my: 获取锁成功的话就把当前结点置为head，之前的head节点去掉引用链，然后返回   p.next = null好像是把之前的head节点的nest置为null 也就是原来的head结点去掉引用链，方便回收
                     p.next = null; // help GC
                     failed = false;
                     return interrupted;
                 }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                    parkAndCheckInterrupt())
+                if (shouldParkAfterFailedAcquire(p, node) &&      // my: 如果前驱结点不是head或者加锁失败的话，就调用shouldParkAfterFailedAcquire 判断是否应该停止自旋进入阻塞状态
+                    parkAndCheckInterrupt())  // my: 挂起当前线程(将当前线程进入堵塞状态)并判断当前线程是否被中断
                     interrupted = true;
             }
         } finally {
-            if (failed)
+            if (failed) // my:  如果线程自旋中因为异常等原因获取锁最终失败，则调用此方法，将此线程对应的node的waitStatus改为CANCEL
                 cancelAcquire(node);
         }
     }
@@ -1191,13 +1191,13 @@ public abstract class AbstractQueuedSynchronizer
      * to implement method {@link Lock#lock}.
      *
      * @param arg the acquire argument.  This value is conveyed to
-     *        {@link #tryAcquire} but is otherwise uninterpreted and
+     *        {@link #tryAcquire} but is otherwise uninterpreted and                  // my: 下面方法中的acquireQueued方法比较重要
      *        can represent anything you like.
      */
     public final void acquire(int arg) {
-        if (!tryAcquire(arg) &&
-            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
-            selfInterrupt();
+        if (!tryAcquire(arg) &&          // my: tryAcquire：尝试直接获取锁，如果成功就直接返回
+            acquireQueued(addWaiter(Node.EXCLUSIVE), arg)) // my: addWaiter：将该线程加入等待队列FIFO的尾部，并标记为独占模式   acquireQueued：线程阻塞在等待队列中获取锁，一直获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。
+            selfInterrupt(); // my: selfInterrupt：自我中断，就是既拿不到锁，又在等待时被中断了，线程就会进行自我中断selfInterrupt()，将中断补上。  如果是因为中断唤醒的线程，获取锁后需要补一下中断
     }
 
     /**
@@ -1255,12 +1255,12 @@ public abstract class AbstractQueuedSynchronizer
      * @param arg the release argument.  This value is conveyed to
      *        {@link #tryRelease} but is otherwise uninterpreted and
      *        can represent anything you like.
-     * @return the value returned from {@link #tryRelease}
+     * @return the value returned from {@link #tryRelease}             // my: AQS中释放锁的方法是release()，当调用该方法时会释放指定量的资源 (也就是锁) ，如果彻底释放了（即state=0）,它会唤醒等待队列里的其他线程来获取资源
      */
     public final boolean release(int arg) {
-        if (tryRelease(arg)) {
+        if (tryRelease(arg)) {  // my: 核心的逻辑都在tryRelease方法中，该方法的作用是释放资源，AQS里该方法没有具体的实现，需要由自定义的同步器去实现，我们可以看下ReentrantLock代码中对应方法
             Node h = head;
-            if (h != null && h.waitStatus != 0)
+            if (h != null && h.waitStatus != 0)  // my: 完全释放资源后，当前线程要做的就是唤醒CLH队列中第一个在等待资源的线程，也就是head结点后面的线程，此时调用的方法是unparkSuccessor()
                 unparkSuccessor(h);
             return true;
         }

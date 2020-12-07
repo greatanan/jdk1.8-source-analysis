@@ -52,7 +52,7 @@ package java.util.concurrent;
  * @see Executor
  * @since 1.5
  * @author Doug Lea
- * @param <V> the result type of method {@code call}
+ * @param <V> the result type of method {@code call}            // my: 这个接口就是一个函数式接口 里面只有一个call()方法
  */
 @FunctionalInterface
 public interface Callable<V> {
