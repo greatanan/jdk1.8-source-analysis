@@ -152,22 +152,22 @@ public class ThreadLocal<T> {
      * Returns the value in the current thread's copy of this
      * thread-local variable.  If the variable has no value for the
      * current thread, it is first initialized to the value returned
-     * by an invocation of the {@link #initialValue} method.
+     * by an invocation of the {@link #initialValue} method.   // my: 返回此线程局部变量的当前线程副本中的值。 如果该变量没有当前线程的值，则首先将其初始化为通过调用initialValue方法返回的值。
      *
-     * @return the current thread's value of this thread-local
+     * @return the current thread's value of this thread-local  此线程本地的当前线程的值
      */
     public T get() {
-        Thread t = Thread.currentThread();//拿到了我们当前线程
-        ThreadLocalMap map = getMap(t);//通过当前线程拿到了当前的ThreadLocalMap
+        Thread t = Thread.currentThread(); // 拿到了我们当前线程
+        ThreadLocalMap map = getMap(t); // 通过当前线程拿到了当前的ThreadLocalMap  ThreadLocalmap的静态类，它由一个首位闭合的动态数组组成（默认大小为16），每个数组都是一个Entry对象，该对象以ThreadLocal对象作为key，以传入的数据作为值进行封装而成
         if (map != null) {
-            ThreadLocalMap.Entry e = map.getEntry(this);//如果map不为空的话就会将我们的this传入getEntity方法()
-            if (e != null) {
+            ThreadLocalMap.Entry e = map.getEntry(this); // 如果ThreadLocalMap不为空的话就会将我们的this传入getEntity方法() 获取ThreadLocalMap.Entry对象  this就是当前的ThreadLocal
+            if (e != null) { // my: 如果键值对映射ThreadLocalMap.Entry不为null
                 @SuppressWarnings("unchecked")
-                T result = (T)e.value;
+                T result = (T)e.value;  // my: 获取ThreadLocalMap.Entry中的值并且返回
                 return result;
             }
         }
-        return setInitialValue();
+        return setInitialValue(); // my: 如果当前线程的ThreadLocalMap为null就返回setInitialValue()方法进行初始化的值  如果该变量没有当前线程的值，则首先将其初始化为通过调用initialValue方法返回的值
     }
 
     /**
@@ -226,11 +226,11 @@ public class ThreadLocal<T> {
      * Get the map associated with a ThreadLocal. Overridden in
      * InheritableThreadLocal.
      *
-     * @param  t the current thread
+     * @param  t the current thread              这里就是通过Thread来间接引用ThreadLocal，再引用ThreadLocalMap，从而达到通过线程来获取ThreadLocalmap的目的
      * @return the map
      */
-    ThreadLocalMap getMap(Thread t) {
-        return t.threadLocals;
+    ThreadLocalMap getMap(Thread t) { // my: 根据当前线程获取当前线程的ThreadLocalMap对象
+        return t.threadLocals; // my: 返回 ThreadLocal.ThreadLocalMap
     }
 
     /**
@@ -286,14 +286,14 @@ public class ThreadLocal<T> {
     }
 
     /**
-     * ThreadLocalMap is a customized hash map suitable only for
+     * ThreadLocalMap is a customized hash map suitable only for           翻译这段: ThreadLocalMap是一个自定义的哈希映射，仅适用于维护线程局部值。 没有操作导出到ThreadLocal类之外。 该类是包私有的，以允许在Thread类中声明字段。 为了帮助处理非常长的使用寿命，哈希表条目使用WeakReferences作为键。 但是，由于未使用参考队列，因此仅在表开始空间不足时，才保证删除过时的条目。
      * maintaining thread local values. No operations are exported
      * outside of the ThreadLocal class. The class is package private to
      * allow declaration of fields in class Thread.  To help deal with
      * very large and long-lived usages, the hash table entries use
      * WeakReferences for keys. However, since reference queues are not
      * used, stale entries are guaranteed to be removed only when
-     * the table starts running out of space.
+     * the table starts running out of space.                                     // my: ThreadLocal的内部维护着一个叫做ThreadLocalmap的静态类，它由一个首位闭合的动态数组组成（默认大小为16），每个数组都是一个Entry对象，该对象以ThreadLocal对象作为key，以传入的数据作为值进行封装而成。
      */
     static class ThreadLocalMap {
 
@@ -307,9 +307,9 @@ public class ThreadLocal<T> {
          */
         static class Entry extends WeakReference<ThreadLocal<?>> {
             /** The value associated with this ThreadLocal. */
-            Object value;
+            Object value; // my: 与此ThreadLocal关联的值
 
-            Entry(ThreadLocal<?> k, Object v) {//用ThreadLocal对象和值创建一个Entry
+            Entry(ThreadLocal<?> k, Object v) { // Entry构造方法, 用ThreadLocal对象和值创建一个Entry
                 super(k);
                 value = v;
             }
@@ -401,22 +401,22 @@ public class ThreadLocal<T> {
         }
 
         /**
-         * Get the entry associated with key.  This method
+         * Get the entry associated with key.  This method        翻译这段: 获取与键关联的条目。 此方法本身仅处理快速路径：直接命中现有密钥。 否则，它将中继到getEntryAfterMiss。 旨在通过部分使此方法易于操作来最大程度地提高直接打击的性能。
          * itself handles only the fast path: a direct hit of existing
          * key. It otherwise relays to getEntryAfterMiss.  This is
          * designed to maximize performance for direct hits, in part
          * by making this method readily inlinable.
          *
          * @param  key the thread local object
-         * @return the entry associated with key, or null if no such
+         * @return the entry associated with key, or null if no such             // my:  根据ThreadLocal作为key键获取Entry
          */
         private Entry getEntry(ThreadLocal<?> key) {
-            int i = key.threadLocalHashCode & (table.length - 1);
-            Entry e = table[i];
+            int i = key.threadLocalHashCode & (table.length - 1);  // my: 根据ThradLocal的HashCode值与运算数组的长度-1进行与运算获取一个在数组中的位置
+            Entry e = table[i]; // my: 得到数组该位置上面的节点对象Entry
             if (e != null && e.get() == key)
-                return e;
+                return e;  // my: 如果该节点对象Entry不为null且该Entry对象的get方法获取的值就是我们的入参ThreadLocal 就直接返回该节点
             else
-                return getEntryAfterMiss(key, i, e);
+                return getEntryAfterMiss(key, i, e); // my: 否则调用getEntryAfterMiss方法
         }
 
         /**
@@ -458,45 +458,45 @@ public class ThreadLocal<T> {
             // it is to replace existing ones, in which case, a fast
             // path would fail more often than not.
 
-            Entry[] tab = table;
-            int len = tab.length;
-            int i = key.threadLocalHashCode & (len-1);
+            Entry[] tab = table; // my: 获取数组
+            int len = tab.length; // my: 得到数组长度
+            int i = key.threadLocalHashCode & (len-1); //获取键值的hashCode与数组的长度-1进行与运算
 
-            for (Entry e = tab[i];
+            for (Entry e = tab[i];  // my: 遍历循环整个数组
                  e != null;
                  e = tab[i = nextIndex(i, len)]) {
-                ThreadLocal<?> k = e.get();
+                ThreadLocal<?> k = e.get(); //得到键值
 
-                if (k == key) {
-                    e.value = value;
+                if (k == key) { // 如果键和传入的键相同（也就是传入的key已经存在了）
+                    e.value = value; // 用新值覆盖旧值
                     return;
                 }
 
-                if (k == null) {
-                    replaceStaleEntry(key, value, i);
+                if (k == null) { // 如果键为null
+                    replaceStaleEntry(key, value, i); // 调用replaceStaleEntry方法
                     return;
                 }
             }
 
-            tab[i] = new Entry(key, value);
-            int sz = ++size;
-            if (!cleanSomeSlots(i, sz) && sz >= threshold)
-                rehash();
+            tab[i] = new Entry(key, value); // 把传入的键和值进行构造新建Entry对象
+            int sz = ++size; // size+1赋值为sz
+            if (!cleanSomeSlots(i, sz) && sz >= threshold) // 如果数组中没有冗余的null值并且如果size大于临界值
+                rehash(); // 扩容重新hash
         }
 
         /**
-         * Remove the entry for key.
+         * Remove the entry for key. // 根据键移除对应的值       remove方法是根据传入的ThreadLocal作为键，然后去计算键位，再从键位的下一个index值开始进行逐个遍历，直到找到的值和键相同，就调用reference的clear方法将引用置为null，并且清除无用的null值，然后结束该方法。
          */
         private void remove(ThreadLocal<?> key) {
-            Entry[] tab = table;
-            int len = tab.length;
-            int i = key.threadLocalHashCode & (len-1);
-            for (Entry e = tab[i];
+            Entry[] tab = table; // 复制整个数组
+            int len = tab.length; // 得到数组的长度
+            int i = key.threadLocalHashCode & (len-1); // 根据HashCode值计算键位
+            for (Entry e = tab[i]; // 遍历循环整个数组
                  e != null;
                  e = tab[i = nextIndex(i, len)]) {
-                if (e.get() == key) {
-                    e.clear();
-                    expungeStaleEntry(i);
+                if (e.get() == key) { // 如果找到的值和键相同
+                    e.clear(); // 调用reference类中的clear方法将引用置为null
+                    expungeStaleEntry(i); // 除去不用的null值
                     return;
                 }
             }
@@ -668,11 +668,11 @@ public class ThreadLocal<T> {
          * shrink the size of the table, double the table size.
          */
         private void rehash() {
-            expungeStaleEntries();
+            expungeStaleEntries(); // 移除不用的entry
 
             // Use lower threshold for doubling to avoid hysteresis
-            if (size >= threshold - threshold / 4)
-                resize();
+            if (size >= threshold - threshold / 4) // 如果size大于等于临界值-临界值的4分之一（这里相当于是12）
+                resize(); // 扩容
         }
 
         /**
